@@ -26,6 +26,15 @@ const {
     markNotificationsRead
 } = require('./handlers/users')
 
+const {
+    getAllInformation,
+    getTopics,
+    getTags,
+
+} = require('./handlers/information')
+
+
+
 const firebase = require('firebase');
 
 //scream routes

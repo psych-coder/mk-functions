@@ -37,7 +37,21 @@ let db = {
             type: 'like|comment',
             createdAt: '2019-10-03T11:23:48.377Z'
         }
+    ],
+    information : [
+        {
+            body : "First post",
+            cardImage: "",
+            commentCount:0,
+            createdAt:'2019-10-03T11:23:48.377Z',
+            likeCount:0,
+            shortDesc:'',
+            tags:'tags,tag',
+            topic:'topic',
+            userhandle:'sdf23324df'
+        }
     ]
+    
 }
 
 const userDetails = {
