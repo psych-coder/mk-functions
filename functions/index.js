@@ -27,15 +27,25 @@ const {
 } = require('./handlers/users')
 
 const {
+    getInformations,
+    getEditoredInformations,
     getAllInformation,
     getTopics,
-    getTags,
-
+    getEditoredTopics,
+    createAInformation
 } = require('./handlers/information')
 
 
 
 const firebase = require('firebase');
+//Information  routes
+app.get("/informations",getInformations);
+app.get("/getEditorInfo",getEditoredInformations);
+app.get("/getAllInfo",getAllInformation);
+app.get("/topics",getTopics);
+app.get("/getEditoredTopics",getEditoredTopics);
+app.post("/information",FBAuth,createAInformation);
+
 
 //scream routes
 app.get('/screams', getAllScreams); 
