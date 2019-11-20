@@ -32,7 +32,9 @@ const {
     getAllInformation,
     getTopics,
     getEditoredTopics,
-    createAInformation
+    createAInformation,
+    updateInformation,
+    deleteInformation
 } = require('./handlers/information')
 
 
@@ -45,6 +47,8 @@ app.get("/getAllInfo",getAllInformation);
 app.get("/topics",getTopics);
 app.get("/getEditoredTopics",getEditoredTopics);
 app.post("/information",FBAuth,createAInformation);
+app.put("/information/:informationId",FBAuth,updateInformation);
+app.delete("/information/:informationId",FBAuth,deleteInformation);
 
 
 //scream routes

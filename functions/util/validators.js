@@ -46,8 +46,6 @@ exports.validateLoginData = (data) => {
 
 }
 
-
-
 exports.reduceUserDetails = (data) => {
 
     let userDetails  = {};
@@ -59,4 +57,12 @@ exports.reduceUserDetails = (data) => {
     }
     if(!isEmpty(data.location.trim())) userDetails.location = data.location;
     return userDetails;
+}
+exports.reduceInfoDetails = (data) => {
+
+    let infoDetails  = {};
+    if(!isEmpty(data.shortDesc.trim())) infoDetails.shortDesc = data.shortDesc;
+    if(!isEmpty(data.tags.trim())) infoDetails.tags = data.tags;
+    if(!isEmpty(data.topic.trim())) infoDetails.topic = data.topic;
+    return infoDetails;
 }

@@ -1,4 +1,5 @@
 const {db} = require('../util/admin')
+const {reduceInfoDetails} = require('../util/validators')
 
 //get limited infomations
 exports.getInformations = (req,res) =>{
@@ -160,7 +161,6 @@ exports.createAInformation = (req,res) =>{
        //shortDesc:req.body.shortDesc,
         //tags:req.body.tags,
         //topic:req.body.topic,
-        //userhandle:req.body.userhandle,
         editorpick:req.body.editorpick,
         createdAt : new Date().toISOString(),
         //likeCount:0,
@@ -178,5 +178,43 @@ exports.createAInformation = (req,res) =>{
     .catch((err) => {
         res.status(500).json({error: 'Something went wrong'});
         console.error(err);
+    })
+}
+
+//update Information
+exports.updateInformation = (req,res) =>{
+    let information= reduceInfoDetails(req.body);
+
+    console.log(req.params.informationId);
+    db.doc(`/information/${req.params.informationId}`).update(information)
+    .then(() =>{
+        res.json("Information update successfully");
+    })
+    .catch(err => {
+        console.error(err)
+        res.status(500).json({error : err });
+    });
+}
+//delete information
+exports.deleteInformation = (req,res) =>{
+    const document = db.doc(`/information/${req.params.informationId}`);
+
+    document.get()
+    .then((doc) => {
+        if(!doc.exists){
+            return res.status(400).json({error : 'Information not found'});
+        }
+        if(doc.data().userHandle !== req.user.handle ){
+            return res.status(403).json({error : 'Unauthorized access'})
+        }else{
+            document.delete();
+        }
+    })
+    .then(() => {
+        res.status(200).json({message : 'Information deleted successfully'})
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).json({error : err.code })
     })
 }
