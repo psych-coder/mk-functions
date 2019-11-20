@@ -34,12 +34,17 @@ const {
     getEditoredTopics,
     createAInformation,
     updateInformation,
-    deleteInformation
+    deleteInformation,
+    likeInformation,
+    unlikeInformation
 } = require('./handlers/information')
 
 
 
 const firebase = require('firebase');
+
+//Quiz routes
+
 //Information  routes
 app.get("/informations",getInformations);
 app.get("/getEditorInfo",getEditoredInformations);
@@ -49,7 +54,8 @@ app.get("/getEditoredTopics",getEditoredTopics);
 app.post("/information",FBAuth,createAInformation);
 app.put("/information/:informationId",FBAuth,updateInformation);
 app.delete("/information/:informationId",FBAuth,deleteInformation);
-
+app.get('/information/:informationId/like',FBAuth,likeInformation);
+app.get('/information/:informationId/unlike',FBAuth,unlikeInformation);
 
 //scream routes
 app.get('/screams', getAllScreams); 

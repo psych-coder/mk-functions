@@ -218,3 +218,91 @@ exports.deleteInformation = (req,res) =>{
         res.status(500).json({error : err.code })
     })
 }
+
+//Like a information
+exports.likeInformation = (req,res) =>{  
+    const likeDocument = db
+                        .collection('information').where("userHandle","==",req.user.handle)
+                        .where("informationId","==",req.params.informationId)
+                        .limit(1);
+
+    const infoDocument = db.doc(`/information/${req.params.informationId}`) 
+
+    let infoData;
+
+    infoDocument.get()
+    .then((doc) => {
+        if(doc.exists){
+            infoData = doc.data();
+            infoData.informationId = doc.id;
+            return likeDocument.get();
+        }else{
+            return res.status(404).json({error : 'information not found'});
+        }
+    })
+    .then((data) => {
+        if(data.empty){
+            return db.collection('iLikes').add({
+                informationId : req.params.informationId,
+                userHandle : req.user.handle
+            })
+            .then(() => {
+                infoData.likeCount++;
+                return infoDocument.update({likeCount : infoDocument.likeCount })
+            })
+            .then(() => {
+                return res.json(infoDocument);
+            })
+        }else{
+            return res.status(400).json( {error : 'information already liked'});
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({error : error.code });
+    })
+
+}
+
+//UnLike a scream
+exports.unlikeScream = (req,res) =>{  
+    const likeDocument = db
+                        .collection('likes')
+                        .where("userHandle","==",req.user.handle)
+                        .where("informationId","==",req.params.informationId)
+                        .limit(1);
+
+    const infoDocument = db.doc(`/information/${req.params.informationId}`) 
+
+    let infoDocument;
+
+    infoDocument.get()
+    .then((doc) => {
+        if(doc.exists){
+            infoData = doc.data();
+            infoData.informationId = doc.id;
+            return likeDocument.get();
+        }else{
+            return res.status(404).json({error : 'information not found'});
+        }
+    })
+    .then((data) => {
+        if(data.empty){
+            return res.status(400).json( {error : 'information not liked'});
+        }else{
+            return db.doc(`/iLikes/${data.docs[0].id}`).delete()
+            .then(() => {
+                infoData.likeCount--;
+                return infoDocument.update({likeCount : infoData.likeCount })
+            })
+            .then(() => {
+                return res.json(infoData);
+            })
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({error : err.code });
+    })
+
+}
