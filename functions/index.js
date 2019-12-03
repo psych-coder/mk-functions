@@ -39,11 +39,18 @@ const {
     unlikeInformation
 } = require('./handlers/information')
 
+const {
+    getQA
+} = require('./handlers/qa')
 
 
 const firebase = require('firebase');
 
+
 //Quiz routes
+
+//QA Routes
+app.get("/QA", getQA);
 
 //Information  routes
 app.get("/informations",getInformations);
