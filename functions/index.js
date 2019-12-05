@@ -40,7 +40,8 @@ const {
 } = require('./handlers/information')
 
 const {
-    getQA
+    getQA,
+    getQuizQA
 } = require('./handlers/qa')
 
 
@@ -50,7 +51,8 @@ const firebase = require('firebase');
 //Quiz routes
 
 //QA Routes
-app.get("/QA", getQA);
+app.get("/QA/:topic", getQA);
+app.get("/Quiz/:quizid", getQuizQA);
 
 //Information  routes
 app.get("/informations",getInformations);

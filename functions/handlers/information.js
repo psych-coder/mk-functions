@@ -265,7 +265,7 @@ exports.likeInformation = (req,res) =>{
 }
 
 //UnLike a scream
-exports.unlikeScream = (req,res) =>{  
+exports.unlikeInformation = (req,res) =>{  
     const likeDocument = db
                         .collection('likes')
                         .where("userHandle","==",req.user.handle)
@@ -274,7 +274,7 @@ exports.unlikeScream = (req,res) =>{
 
     const infoDocument = db.doc(`/information/${req.params.informationId}`) 
 
-    let infoDocument;
+    let infoData;
 
     infoDocument.get()
     .then((doc) => {
