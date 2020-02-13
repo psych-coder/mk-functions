@@ -3,18 +3,18 @@ const {reduceInfoDetails} = require('../util/validators')
 
 //get limited infomations
 exports.getInformations = (req,res) =>{
-    console.log( req.body.startAfter );
+    console.log(req.body.startAfter);
     db
     .collection("information")
     .orderBy('createdAt','desc')
-    .startAfter(req.body.startAfter)
-    .limit(15)
-    .get()
+     .get()
     .then(data => {
         let information=[];
+        console.log(data.size);
         data.forEach((doc) =>(
             information.push({
                 informationId : doc.id,
+                title : doc.data().title,
                 body : doc.data().body,
                 cardImage: doc.data().cardImage,
                 commentCount:doc.data().commentCount,
@@ -155,16 +155,16 @@ exports.createAInformation = (req,res) =>{
     const newInformation = {
         body :req.body.body,
         userHandle : req.user.handle,
-        //cardImage: req.body.cardImage,
-        //commentCount:req.body.commentCount,
-        //likeCount:req.body.likeCount,
-       //shortDesc:req.body.shortDesc,
-        //tags:req.body.tags,
-        //topic:req.body.topic,
+        cardImage: req.body.cardImage,
+        commentCount:req.body.commentCount,
+        likeCount:req.body.likeCount,
+        shortDesc:req.body.shortDesc,
+        tags:req.body.tags,
+        topic:req.body.topic,
         editorpick:req.body.editorpick,
         createdAt : new Date().toISOString(),
-        //likeCount:0,
-        //commentCount:0
+        likeCount:0,
+        commentCount:0
     };
     db
     .collection('information')
