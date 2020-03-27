@@ -44,8 +44,12 @@ const {
     getQuizQA
 } = require('./handlers/qa')
 
+const {
+    getFeeds,
+} = require('./handlers/feeds');
 
 const firebase = require('firebase');
+
 
 
 //Quiz routes
