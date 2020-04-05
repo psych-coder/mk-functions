@@ -66,3 +66,16 @@ exports.reduceInfoDetails = (data) => {
     if(!isEmpty(data.topic.trim())) infoDetails.topic = data.topic;
     return infoDetails;
 }
+
+exports.getHashTags = (inputText) => {  
+    var regex = /(?:#)([a-zA-Z\d\_\-\u0B80-\u0BFF]+)/gm;
+    var matches = [];
+    var match;
+
+    while ((match = regex.exec(inputText))) {
+        matches.push(match[1]);
+    }
+
+    console.log(matches)
+    return matches;
+}

@@ -1,5 +1,6 @@
-const { db } = require("../util/admin");
-const { reduceInfoDetails } = require("../util/validators");
+const {admin,db } = require('../util/admin')
+const { reduceInfoDetails,getHashTags } = require("../util/validators");
+const config = require('../util/config')
 
 //get limited infomations
 exports.getInformations = (req, res) => {
@@ -151,53 +152,52 @@ exports.createAInformation = (req, res) => {
 
   const cardImage = req.body.cardImage !== undefined ? req.body.cardImage : "";
 
-  console.log(req.user.handle);
-  let isAdmin = false;
-  db
-  .collection("users")
-  .where("handle", "==", req.user.handle)
-  .limit(1).get().then(data => {
-	  
-	  if (data.size < 0 ) {
+  const tags = getHashTags(req.body.body).toString();
+
+  console.log(tags);
+  const newInformation = {
+    title: req.body.title,
+    body: req.body.body,
+    userHandle: req.user.handle,
+    cardImage: cardImage,
+    shortDesc: shortDesc,
+    tags: tags,
+    //topic: req.body.topic,
+    editorpick: req.body.editorpick,
+    createdAt: new Date().toISOString(),
+    likeCount: 0,
+    commentCount: 0
+  };
+
+  db.collection("users")
+    .where("handle", "==", req.user.handle)
+    .limit(1)
+    .get()
+    .then(data => {
+      if (data.size < 0) {
         return res.status(400).json({ error: "Unauthorized access" });
       }
-      
-      data.forEach((doc) => {
-          console.log(doc.data().role)
+
+      data.forEach(doc => {
         if (doc.data().role == "admin") {
-            const newInformation = {
-                title: req.body.title,
-                body: req.body.body,
-                userHandle: req.user.handle,
-                cardImage: cardImage,
-                shortDesc: shortDesc,
-                tags: req.body.tags,
-                topic: req.body.topic,
-                editorpick: req.body.editorpick,
-                createdAt: new Date().toISOString(),
-                likeCount: 0,
-                commentCount: 0
-              };
-              db.collection("information")
-                .add(newInformation)
-                .then(doc => {
-                  const resInfo = newInformation;
-                  resInfo.informationId = doc.id;
-                  res.json(resInfo);
-                  //res.json({message: `document.${doc.id} created succesfully`});
-                })
-                .catch(err => {
-                  res.status(500).json({ error: "Something went wrong" });
-                  console.error(err);
-                });
-            
-          } else {
-            return res.status(403).json({ error: "Unauthorized access" });
-          }
-        })
-  })
-    
-      
+          
+          db.collection("information")
+            .add(newInformation)
+            .then(doc => {
+              const resInfo = newInformation;
+              resInfo.informationId = doc.id;
+              res.json(resInfo);
+              //res.json({message: `document.${doc.id} created succesfully`});
+            })
+            .catch(err => {
+              res.status(500).json({ error: "Something went wrong" });
+              console.error(err);
+            });
+        } else {
+          return res.status(403).json({ error: "Unauthorized access" });
+        }
+      });
+    });
   
 };
 
@@ -333,3 +333,52 @@ exports.unlikeInformation = (req, res) => {
       res.status(500).json({ error: err.code });
     });
 };
+
+exports.uploadImg = (req,res) =>{
+  const BusBoy = require('busboy');
+  const path = require('path');
+  const os  = require('os');
+  const fs = require('fs');
+
+  const busboy = new BusBoy({headers : req.headers });
+
+  let imageFileName;
+  let imageToBeUploaded;
+
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+      if(mimetype !== 'image/jpeg' && mimetype !== 'image/png'){
+          return res.status(400).json({error :'Wrong file format'})
+      }
+
+      const imageExtension = filename.split('.')[filename.split('.').length - 1 ];
+      imageFileName = `${Math.round(Math.random() * 100000000000)}.${imageExtension}`;
+      console.log( " imageFileName ======= " + imageFileName );
+
+      const filePath = path.join(os.tmpdir(),imageFileName);
+      imageToBeUploaded = {filePath, mimetype };
+      
+      file.pipe(fs.WriteStream(filePath));
+  });
+  console.log( " imageFileName ======= " + imageFileName );
+
+  busboy.on('finish', () => {
+
+      admin.storage().bucket().upload(imageToBeUploaded.filePath, {
+          resumable : false,
+          metadata:{
+              metadata : {
+                  contentType : imageToBeUploaded.mimetype
+              }
+          }  
+      })
+      .then(() =>{
+          const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media` 
+          return res.status(200).json({imageURl : imageUrl })
+      })
+      .catch((err) => {
+          console.error(err);
+          return res.status(500).json({error :err.code})
+      })
+  });
+  busboy.end(req.rawBody);    
+}

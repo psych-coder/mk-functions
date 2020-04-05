@@ -36,7 +36,8 @@ const {
     updateInformation,
     deleteInformation,
     likeInformation,
-    unlikeInformation
+    unlikeInformation,
+    uploadImg
 } = require('./handlers/information')
 
 const {
@@ -69,6 +70,7 @@ app.put("/information/:informationId",FBAuth,updateInformation);
 app.delete("/information/:informationId",FBAuth,deleteInformation);
 app.get('/information/:informationId/like',FBAuth,likeInformation);
 app.get('/information/:informationId/unlike',FBAuth,unlikeInformation);
+app.post('/information/image', FBAuth, uploadImg );
 
 //scream routes
 app.get('/screams', getAllScreams); 
