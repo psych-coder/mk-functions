@@ -76,6 +76,6 @@ exports.getHashTags = (inputText) => {
         matches.push(match[1]);
     }
 
-    console.log(matches)
+    //console.log(matches)
     return matches;
 }

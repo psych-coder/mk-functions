@@ -94,22 +94,21 @@ exports.getAllInformation = (req, res) => {
     });
 };
 
-// getTopics,
-exports.getTopics = (req, res) => {
-  db.collection("topics")
+// getTags,
+exports.getTags = (req, res) => {
+  db.collection("tags")
     .limit(20)
     .get()
     .then(data => {
-      let topics = [];
+      let tags = [];
       data.forEach(doc =>
-        topics.push({
-          topicId: doc.id,
-          editorpick: doc.data().editorpick,
-          subtopics: doc.data().subtopics,
-          topic: doc.data().topic
+        tags.push({
+          tagid: doc.id,
+          tag: doc.data().tag,
+          count: doc.data().count
         })
       );
-      return res.json(topics);
+      return res.json(tags);
     })
     .catch(err => {
       console.error(err);
@@ -154,14 +153,14 @@ exports.createAInformation = (req, res) => {
 
   const tags = getHashTags(req.body.body).toString();
 
-  console.log(tags);
+  //console.log(tags);
   const newInformation = {
     title: req.body.title,
     body: req.body.body,
     userHandle: req.user.handle,
     cardImage: cardImage,
     shortDesc: shortDesc,
-    tags: tags,
+    tags: tags.split(","),
     //topic: req.body.topic,
     editorpick: req.body.editorpick,
     createdAt: new Date().toISOString(),
@@ -197,7 +196,7 @@ exports.createAInformation = (req, res) => {
           return res.status(403).json({ error: "Unauthorized access" });
         }
       });
-    });
+    }); 
   
 };
 
