@@ -28,6 +28,7 @@ const {
 
 const {
   getInformations,
+  getTaggedInfo,
   getEditoredInformations,
   getAllInformation,
   getEditoredTopics,
@@ -37,6 +38,7 @@ const {
   likeInformation,
   unlikeInformation,
   uploadImg,
+  getTags,
 } = require("./handlers/information");
 
 const { getQA, getQuizQA } = require("./handlers/qa");
@@ -53,6 +55,7 @@ app.get("/Quiz/:quizid", getQuizQA);
 
 //Information  routes
 app.get("/informations", getInformations);
+app.get("/informations/tags/:tagName", getTaggedInfo);
 app.get("/getEditorInfo", getEditoredInformations);
 app.get("/getAllInfo", getAllInformation);
 app.get("/getEditoredTopics", getEditoredTopics);
@@ -62,6 +65,8 @@ app.delete("/information/:informationId", FBAuth, deleteInformation);
 app.get("/information/:informationId/like", FBAuth, likeInformation);
 app.get("/information/:informationId/unlike", FBAuth, unlikeInformation);
 app.post("/information/image", FBAuth, uploadImg);
+
+app.get("/tags", getTags );
 
 //scream routes
 app.get("/screams", getAllScreams);

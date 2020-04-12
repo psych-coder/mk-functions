@@ -1,6 +1,6 @@
-const {admin,db } = require('../util/admin')
-const { reduceInfoDetails,getHashTags } = require("../util/validators");
-const config = require('../util/config')
+const { admin, db } = require("../util/admin");
+const { reduceInfoDetails, getHashTags } = require("../util/validators");
+const config = require("../util/config");
 
 //get limited infomations
 exports.getInformations = (req, res) => {
@@ -8,10 +8,10 @@ exports.getInformations = (req, res) => {
   db.collection("information")
     .orderBy("createdAt", "desc")
     .get()
-    .then(data => {
+    .then((data) => {
       let information = [];
       console.log(data.size);
-      data.forEach(doc =>
+      data.forEach((doc) =>
         information.push({
           informationId: doc.id,
           title: doc.data().title,
@@ -24,16 +24,47 @@ exports.getInformations = (req, res) => {
           tags: doc.data().tags,
           topic: doc.data().topic,
           editorpick: doc.data().editorpick,
-          userhandle: doc.data().userhandle
+          userhandle: doc.data().userhandle,
         })
       );
       return res.json(information);
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
     });
 };
 
+exports.getTaggedInfo = (req, res) => {
+  console.log(req.body.startAfter);
+  db.collection("information")
+  .where("tags","array-contains",req.params.tagName)
+    .orderBy("createdAt", "desc")
+    .get()
+    .then((data) => {
+      let information = [];
+      console.log(data.size);
+      data.forEach((doc) =>
+        information.push({
+          informationId: doc.id,
+          title: doc.data().title,
+          body: doc.data().body,
+          cardImage: doc.data().cardImage,
+          commentCount: doc.data().commentCount,
+          likeCount: doc.data().likeCount,
+          createdAt: doc.data().createdAt,
+          shortDesc: doc.data().shortDesc,
+          tags: doc.data().tags,
+          topic: doc.data().topic,
+          editorpick: doc.data().editorpick,
+          userhandle: doc.data().userhandle,
+        })
+      );
+      return res.json(information);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
 //get editior picked informations
 exports.getEditoredInformations = (req, res) => {
   db.collection("information")
@@ -41,9 +72,9 @@ exports.getEditoredInformations = (req, res) => {
     .orderBy("createdAt", "desc")
     .limit(20)
     .get()
-    .then(data => {
+    .then((data) => {
       let information = [];
-      data.forEach(doc =>
+      data.forEach((doc) =>
         information.push({
           informationId: doc.id,
           body: doc.data().body,
@@ -55,12 +86,12 @@ exports.getEditoredInformations = (req, res) => {
           tags: doc.data().tags,
           topic: doc.data().topic,
           editorpick: doc.data().editorpick,
-          userhandle: doc.data().userhandle
+          userhandle: doc.data().userhandle,
         })
       );
       return res.json(information);
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
     });
 };
@@ -70,9 +101,9 @@ exports.getAllInformation = (req, res) => {
   db.collection("information")
     .orderBy("createdAt", "desc")
     .get()
-    .then(data => {
+    .then((data) => {
       let information = [];
-      data.forEach(doc =>
+      data.forEach((doc) =>
         information.push({
           informationId: doc.id,
           body: doc.data().body,
@@ -84,34 +115,58 @@ exports.getAllInformation = (req, res) => {
           tags: doc.data().tags,
           topic: doc.data().topic,
           editorpick: doc.data().editorpick,
-          userhandle: doc.data().userhandle
+          userhandle: doc.data().userhandle,
         })
       );
       return res.json(information);
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
     });
 };
 
 // getTags,
 exports.getTags = (req, res) => {
+  let tags = [];
   db.collection("tags")
-    .limit(20)
+    .where("count", ">=", "5")
+    .limit(10)
     .get()
-    .then(data => {
-      let tags = [];
-      data.forEach(doc =>
-        tags.push({
-          tagid: doc.id,
-          tag: doc.data().tag,
-          count: doc.data().count
-        })
-      );
-      return res.json(tags);
+    .then((data) => {
+      if (data.size > 0) {
+       
+        data.forEach((doc) =>
+          tags.push({
+            tagid: doc.id,
+            tag: doc.data().tag,
+            count: doc.data().count,
+          })
+        );
+        return res.status(200).json(tags);
+      } else {
+        console.log("inside")
+        db.collection("tags")
+          .limit(10)
+          .get()
+          .then((data) => {
+            data.forEach((doc) =>
+              tags.push({
+                tagid: doc.id,
+                tag: doc.data().tag,
+                count: doc.data().count,
+              })
+            );
+            return res.status(200).json(tags);
+          })
+          .catch((err) => {
+            console.error(err);
+            return res.status(500).json({ error: "Error while getting tags" });
+          });
+      }
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
+      return res.status(500).json({ error: "Error while getting tags" });
     });
 };
 
@@ -121,19 +176,19 @@ exports.getEditoredTopics = (req, res) => {
     .where("editorpick", "==", true)
     .limit(20)
     .get()
-    .then(data => {
+    .then((data) => {
       let topics = [];
-      data.forEach(doc =>
+      data.forEach((doc) =>
         topics.push({
           topicId: doc.id,
           editorpick: doc.data().editorpick,
           subtopics: doc.data().subtopics,
-          topic: doc.data().topic
+          topic: doc.data().topic,
         })
       );
       return res.json(topics);
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
     });
 };
@@ -165,30 +220,29 @@ exports.createAInformation = (req, res) => {
     editorpick: req.body.editorpick,
     createdAt: new Date().toISOString(),
     likeCount: 0,
-    commentCount: 0
+    commentCount: 0,
   };
 
   db.collection("users")
     .where("handle", "==", req.user.handle)
     .limit(1)
     .get()
-    .then(data => {
+    .then((data) => {
       if (data.size < 0) {
         return res.status(400).json({ error: "Unauthorized access" });
       }
 
-      data.forEach(doc => {
+      data.forEach((doc) => {
         if (doc.data().role == "admin") {
-          
           db.collection("information")
             .add(newInformation)
-            .then(doc => {
+            .then((doc) => {
               const resInfo = newInformation;
               resInfo.informationId = doc.id;
               res.json(resInfo);
               //res.json({message: `document.${doc.id} created succesfully`});
             })
-            .catch(err => {
+            .catch((err) => {
               res.status(500).json({ error: "Something went wrong" });
               console.error(err);
             });
@@ -196,8 +250,7 @@ exports.createAInformation = (req, res) => {
           return res.status(403).json({ error: "Unauthorized access" });
         }
       });
-    }); 
-  
+    });
 };
 
 //update Information
@@ -210,7 +263,7 @@ exports.updateInformation = (req, res) => {
     .then(() => {
       res.json("Information update successfully");
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       res.status(500).json({ error: err });
     });
@@ -221,7 +274,7 @@ exports.deleteInformation = (req, res) => {
 
   document
     .get()
-    .then(doc => {
+    .then((doc) => {
       if (!doc.exists) {
         return res.status(400).json({ error: "Information not found" });
       }
@@ -234,7 +287,7 @@ exports.deleteInformation = (req, res) => {
     .then(() => {
       res.status(200).json({ message: "Information deleted successfully" });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       res.status(500).json({ error: err.code });
     });
@@ -254,7 +307,7 @@ exports.likeInformation = (req, res) => {
 
   infoDocument
     .get()
-    .then(doc => {
+    .then((doc) => {
       if (doc.exists) {
         infoData = doc.data();
         infoData.informationId = doc.id;
@@ -263,13 +316,13 @@ exports.likeInformation = (req, res) => {
         return res.status(404).json({ error: "information not found" });
       }
     })
-    .then(data => {
+    .then((data) => {
       if (data.empty) {
         return db
           .collection("iLikes")
           .add({
             informationId: req.params.informationId,
-            userHandle: req.user.handle
+            userHandle: req.user.handle,
           })
           .then(() => {
             infoData.likeCount++;
@@ -282,7 +335,7 @@ exports.likeInformation = (req, res) => {
         return res.status(400).json({ error: "information already liked" });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       res.status(500).json({ error: error.code });
     });
@@ -302,7 +355,7 @@ exports.unlikeInformation = (req, res) => {
 
   infoDocument
     .get()
-    .then(doc => {
+    .then((doc) => {
       if (doc.exists) {
         infoData = doc.data();
         infoData.informationId = doc.id;
@@ -311,7 +364,7 @@ exports.unlikeInformation = (req, res) => {
         return res.status(404).json({ error: "information not found" });
       }
     })
-    .then(data => {
+    .then((data) => {
       if (data.empty) {
         return res.status(400).json({ error: "information not liked" });
       } else {
@@ -327,57 +380,61 @@ exports.unlikeInformation = (req, res) => {
           });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       res.status(500).json({ error: err.code });
     });
 };
 
-exports.uploadImg = (req,res) =>{
-  const BusBoy = require('busboy');
-  const path = require('path');
-  const os  = require('os');
-  const fs = require('fs');
+exports.uploadImg = (req, res) => {
+  const BusBoy = require("busboy");
+  const path = require("path");
+  const os = require("os");
+  const fs = require("fs");
 
-  const busboy = new BusBoy({headers : req.headers });
+  const busboy = new BusBoy({ headers: req.headers });
 
   let imageFileName;
   let imageToBeUploaded;
 
-  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-      if(mimetype !== 'image/jpeg' && mimetype !== 'image/png'){
-          return res.status(400).json({error :'Wrong file format'})
-      }
+  busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+    if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
+      return res.status(400).json({ error: "Wrong file format" });
+    }
 
-      const imageExtension = filename.split('.')[filename.split('.').length - 1 ];
-      imageFileName = `${Math.round(Math.random() * 100000000000)}.${imageExtension}`;
-      console.log( " imageFileName ======= " + imageFileName );
+    const imageExtension = filename.split(".")[filename.split(".").length - 1];
+    imageFileName = `${Math.round(
+      Math.random() * 100000000000
+    )}.${imageExtension}`;
+    console.log(" imageFileName ======= " + imageFileName);
 
-      const filePath = path.join(os.tmpdir(),imageFileName);
-      imageToBeUploaded = {filePath, mimetype };
-      
-      file.pipe(fs.WriteStream(filePath));
+    const filePath = path.join(os.tmpdir(), imageFileName);
+    imageToBeUploaded = { filePath, mimetype };
+
+    file.pipe(fs.WriteStream(filePath));
   });
-  console.log( " imageFileName ======= " + imageFileName );
+  console.log(" imageFileName ======= " + imageFileName);
 
-  busboy.on('finish', () => {
-
-      admin.storage().bucket().upload(imageToBeUploaded.filePath, {
-          resumable : false,
-          metadata:{
-              metadata : {
-                  contentType : imageToBeUploaded.mimetype
-              }
-          }  
+  busboy.on("finish", () => {
+    admin
+      .storage()
+      .bucket()
+      .upload(imageToBeUploaded.filePath, {
+        resumable: false,
+        metadata: {
+          metadata: {
+            contentType: imageToBeUploaded.mimetype,
+          },
+        },
       })
-      .then(() =>{
-          const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media` 
-          return res.status(200).json({imageURl : imageUrl })
+      .then(() => {
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
+        return res.status(200).json({ imageURl: imageUrl });
       })
       .catch((err) => {
-          console.error(err);
-          return res.status(500).json({error :err.code})
-      })
+        console.error(err);
+        return res.status(500).json({ error: err.code });
+      });
   });
-  busboy.end(req.rawBody);    
-}
+  busboy.end(req.rawBody);
+};
