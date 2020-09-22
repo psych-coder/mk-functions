@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const app = require("express")();
-const { db } = require("./util/admin");
+const { admin, db } = require("./util/admin");
 
 const FBAuth = require("./util/FBAuth");
 
@@ -39,6 +39,7 @@ const {
   unlikeInformation,
   uploadImg,
   getTags,
+  deleteImg,
 } = require("./handlers/information");
 
 const { getQA, getQuizQA } = require("./handlers/qa");
@@ -65,8 +66,9 @@ app.delete("/information/:informationId", FBAuth, deleteInformation);
 app.get("/information/:informationId/like", FBAuth, likeInformation);
 app.get("/information/:informationId/unlike", FBAuth, unlikeInformation);
 app.post("/information/image", FBAuth, uploadImg);
+app.delete("/image", FBAuth, deleteImg);
 
-app.get("/tags", getTags );
+app.get("/tags", getTags);
 
 //scream routes
 app.get("/screams", getAllScreams);
@@ -209,7 +211,7 @@ exports.createOrUpdateTagsOnPost = functions
       //const doc = await db.doc(`/screams/${snapshot.data().screamId}`).get();
       //get hashtags
       const tags = snapshot.data().tags;
-     
+
       tags.forEach((tag) => {
         db.collection("tags")
           .where("tag", "==", tag)
@@ -248,7 +250,7 @@ exports.updateTagsOnUpdate = functions
   .onDelete(async (snapshot) => {
     try {
       const tags = snapshot.data().tags;
-     
+
       tags.forEach((tag) => {
         db.collection("tags")
           .where("tag", "==", tag)
@@ -265,6 +267,41 @@ exports.updateTagsOnUpdate = functions
             });
           });
       });
+
+      return;
+    } catch (err) {
+      console.error(err);
+      return;
+    }
+  });
+
+exports.deleteFilesonPost = functions
+  .region("asia-east2")
+  .firestore.document("information/{id}")
+  .onCreate(async (snapshot) => {
+    try {
+      //const doc = await db.doc(`/screams/${snapshot.data().screamId}`).get();
+      //get hashtags
+      const tags = snapshot.data().tags;
+
+      db.collection("fileinfo")
+        .where("infoid", "==", "")
+        .get()
+        .then((data) => {
+          // console.log(doc.size)
+          if (data.size > 0) {
+            data.forEach((doc) => {
+              filename = doc.data().filename;
+
+              db.doc(`/fileinfo/${doc.id}`)
+                .delete()
+                .then(() => {
+                  admin.storage().bucket().file(filename).delete();
+                })
+                .catch((err) => console.log(err));
+            });
+          }
+        });
 
       return;
     } catch (err) {

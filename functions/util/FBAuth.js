@@ -9,9 +9,11 @@ module.exports = (req,res,next) => {
         return res.status(403).json({error: 'Unauthorized'});
     }
 
+    //console.log(idToken);
     admin.auth().verifyIdToken(idToken)
     .then(decodedToken =>{
         req.user = decodedToken;
+        //console.log(req.user.uid);
         return db.collection('users')
                 .where('userId','==',req.user.uid)
                 .limit(1)
@@ -23,7 +25,7 @@ module.exports = (req,res,next) => {
         return next();
     })
     .catch( err => {
-        console.error('Error while verifying token', err);
+        console.error('Error while verifying token or unauthorized access', err);
         return res.status(403).json(err);
     })
 }

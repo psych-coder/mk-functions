@@ -37,7 +37,7 @@ exports.getInformations = (req, res) => {
 exports.getTaggedInfo = (req, res) => {
   console.log(req.body.startAfter);
   db.collection("information")
-  .where("tags","array-contains",req.params.tagName)
+    .where("tags", "array-contains", req.params.tagName)
     .orderBy("createdAt", "desc")
     .get()
     .then((data) => {
@@ -134,7 +134,6 @@ exports.getTags = (req, res) => {
     .get()
     .then((data) => {
       if (data.size > 0) {
-       
         data.forEach((doc) =>
           tags.push({
             tagid: doc.id,
@@ -144,7 +143,7 @@ exports.getTags = (req, res) => {
         );
         return res.status(200).json(tags);
       } else {
-        console.log("inside")
+        //console.log("inside");
         db.collection("tags")
           .limit(10)
           .get()
@@ -202,11 +201,14 @@ exports.createAInformation = (req, res) => {
   if (req.body.body.trim() === "") {
     return res.status(400).json({ body: "Body must not be empty" });
   }
-  const shortDesc = req.body.body.substring(0, 300) + "...";
+  //const shortDesc = req.body.body.substring(0, 300) + "...";
 
   const cardImage = req.body.cardImage !== undefined ? req.body.cardImage : "";
+  const imageName = req.body.imageName !== undefined ? req.body.imageName : "";
 
   const tags = getHashTags(req.body.body).toString();
+  //const tags = req.body.tags;
+
 
   //console.log(tags);
   const newInformation = {
@@ -214,33 +216,38 @@ exports.createAInformation = (req, res) => {
     body: req.body.body,
     userHandle: req.user.handle,
     cardImage: cardImage,
-    shortDesc: shortDesc,
+    shortDesc: req.body.shortDesc,
     tags: tags.split(","),
     //topic: req.body.topic,
     editorpick: req.body.editorpick,
     createdAt: new Date().toISOString(),
     likeCount: 0,
     commentCount: 0,
+    imageName: imageName,
   };
+
+  //console.log(req.user.handle);
 
   db.collection("users")
     .where("handle", "==", req.user.handle)
     .limit(1)
     .get()
     .then((data) => {
-      if (data.size < 0) {
-        return res.status(400).json({ error: "Unauthorized access" });
-      }
+     // console.log(data);
+            //console.log(data.docs[0].data());
+
+      
 
       data.forEach((doc) => {
         if (doc.data().role == "admin") {
           db.collection("information")
             .add(newInformation)
-            .then((doc) => {
+            .then((d) => {
+              
               const resInfo = newInformation;
-              resInfo.informationId = doc.id;
+              resInfo.informationId = d.id;
               res.json(resInfo);
-              //res.json({message: `document.${doc.id} created succesfully`});
+            //res.status.json({message: `document.${doc.id} created succesfully`});
             })
             .catch((err) => {
               res.status(500).json({ error: "Something went wrong" });
@@ -272,25 +279,45 @@ exports.updateInformation = (req, res) => {
 exports.deleteInformation = (req, res) => {
   const document = db.doc(`/information/${req.params.informationId}`);
 
-  document
+  //admin check
+
+  db.collection("users")
+    .where("handle", "==", req.user.handle)
+    .limit(1)
     .get()
-    .then((doc) => {
-      if (!doc.exists) {
-        return res.status(400).json({ error: "Information not found" });
+    .then((data) => {
+      if ((data.docs[0].data().role = "admin")) {
+        document
+          .get()
+          .then((doc) => {
+            //console.log(doc.data());
+
+            if (!doc.exists) {
+              return res.status(400).json({ error: "Information not found" });
+            }
+            else {
+              document.delete();
+            }
+            /*  if (doc.data().userHandle !== req.user.handle) {
+              return res.status(403).json({ error: "Unauthorized access" });
+            } else {
+              document.delete();
+            } */
+          })
+          .then(() => {
+            res
+              .status(200)
+              .json({ message: "Information deleted successfully" });
+          })
+          .catch((err) => {
+            console.error(err);
+            res.status(500).json({ error: err.code });
+          });
       }
-      if (doc.data().userHandle !== req.user.handle) {
+      else{
         return res.status(403).json({ error: "Unauthorized access" });
-      } else {
-        document.delete();
       }
     })
-    .then(() => {
-      res.status(200).json({ message: "Information deleted successfully" });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).json({ error: err.code });
-    });
 };
 
 //Like a information
@@ -413,7 +440,6 @@ exports.uploadImg = (req, res) => {
 
     file.pipe(fs.WriteStream(filePath));
   });
-  console.log(" imageFileName ======= " + imageFileName);
 
   busboy.on("finish", () => {
     admin
@@ -428,8 +454,22 @@ exports.uploadImg = (req, res) => {
         },
       })
       .then(() => {
+        const fileinfo = {
+          filename: imageFileName,
+          infoid: "",
+        };
+        db.collection("fileinfo")
+          .add(fileinfo)
+          .catch((err) => {
+            console.error(err);
+            return res.status(500).json({ error: err.code });
+          });
+      })
+      .then(() => {
         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
-        return res.status(200).json({ imageURl: imageUrl });
+        return res
+          .status(200)
+          .json({ imageURl: imageUrl, filename: imageFileName });
       })
       .catch((err) => {
         console.error(err);
@@ -437,4 +477,17 @@ exports.uploadImg = (req, res) => {
       });
   });
   busboy.end(req.rawBody);
+};
+
+exports.deleteImg = (req, res) => {
+  admin
+    .storage()
+    .bucket()
+    .file(req.body.filename)
+    .delete()
+    .then(() => res.status(200).json({ message: "file deleted" }))
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
 };
