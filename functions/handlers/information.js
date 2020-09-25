@@ -2,6 +2,42 @@ const { admin, db } = require("../util/admin");
 const { reduceInfoDetails, getHashTags } = require("../util/validators");
 const config = require("../util/config");
 
+//Get an info
+exports.getPost = (req, res) => {
+  console.log(req.params.informationId);
+
+  const document = db.doc(`/information/${req.params.informationId}`);
+
+  document
+    .get()
+    .then((doc) => {
+      let information = [];
+      //console.log(doc.data());
+      if (!doc.exists) {
+        return res.status(400).json({ error: "Information not found" });
+      } else {
+        information.push({
+          informationId: doc.id,
+          title: doc.data().title,
+          body: doc.data().body,
+          cardImage: doc.data().cardImage,
+          commentCount: doc.data().commentCount,
+          likeCount: doc.data().likeCount,
+          createdAt: doc.data().createdAt,
+          shortDesc: doc.data().shortDesc,
+          tags: doc.data().tags,
+          topic: doc.data().topic,
+          editorpick: doc.data().editorpick,
+          userhandle: doc.data().userhandle,
+        });
+      }
+      return res.json(information);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
 //get limited infomations
 exports.getInformations = (req, res) => {
   console.log(req.body.startAfter);
@@ -209,7 +245,6 @@ exports.createAInformation = (req, res) => {
   const tags = getHashTags(req.body.body).toString();
   //const tags = req.body.tags;
 
-
   //console.log(tags);
   const newInformation = {
     title: req.body.title,
@@ -233,21 +268,21 @@ exports.createAInformation = (req, res) => {
     .limit(1)
     .get()
     .then((data) => {
-     // console.log(data);
-            //console.log(data.docs[0].data());
-
-      
+      // console.log(data);
+      //console.log(data.docs[0].data());
 
       data.forEach((doc) => {
         if (doc.data().role == "admin") {
           db.collection("information")
             .add(newInformation)
             .then((d) => {
-              
               const resInfo = newInformation;
               resInfo.informationId = d.id;
               res.json(resInfo);
-            //res.status.json({message: `document.${doc.id} created succesfully`});
+              //cls
+              res.status.json({
+                message: `document.${doc.id} created succesfully`,
+              });
             })
             .catch((err) => {
               res.status(500).json({ error: "Something went wrong" });
@@ -290,12 +325,11 @@ exports.deleteInformation = (req, res) => {
         document
           .get()
           .then((doc) => {
-            //console.log(doc.data());
+            console.log(doc.data());
 
             if (!doc.exists) {
               return res.status(400).json({ error: "Information not found" });
-            }
-            else {
+            } else {
               document.delete();
             }
             /*  if (doc.data().userHandle !== req.user.handle) {
@@ -313,11 +347,10 @@ exports.deleteInformation = (req, res) => {
             console.error(err);
             res.status(500).json({ error: err.code });
           });
-      }
-      else{
+      } else {
         return res.status(403).json({ error: "Unauthorized access" });
       }
-    })
+    });
 };
 
 //Like a information

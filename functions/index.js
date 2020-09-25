@@ -40,6 +40,7 @@ const {
   uploadImg,
   getTags,
   deleteImg,
+  getPost,
 } = require("./handlers/information");
 
 const { getQA, getQuizQA } = require("./handlers/qa");
@@ -59,6 +60,7 @@ app.get("/informations", getInformations);
 app.get("/informations/tags/:tagName", getTaggedInfo);
 app.get("/getEditorInfo", getEditoredInformations);
 app.get("/getAllInfo", getAllInformation);
+app.get("/information/:informationId",  getPost);
 app.get("/getEditoredTopics", getEditoredTopics);
 app.post("/information", FBAuth, createAInformation);
 app.put("/information/:informationId", FBAuth, updateInformation);
