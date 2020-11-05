@@ -2,6 +2,11 @@ const { admin, db } = require("../util/admin");
 const { reduceInfoDetails, getHashTags } = require("../util/validators");
 const config = require("../util/config");
 
+const runtimeOpts = {
+  timeoutSeconds: 300,
+  memory: '1GB'
+}
+
 //Get an info
 exports.getPost = (req, res) => {
   console.log(req.params.informationId);
@@ -11,12 +16,12 @@ exports.getPost = (req, res) => {
   document
     .get()
     .then((doc) => {
-      let information = [];
-      //console.log(doc.data());
+      let information;
+      console.log(doc);
       if (!doc.exists) {
         return res.status(400).json({ error: "Information not found" });
       } else {
-        information.push({
+        information = {
           informationId: doc.id,
           title: doc.data().title,
           body: doc.data().body,
@@ -29,7 +34,7 @@ exports.getPost = (req, res) => {
           topic: doc.data().topic,
           editorpick: doc.data().editorpick,
           userhandle: doc.data().userhandle,
-        });
+        };
       }
       return res.json(information);
     })
@@ -40,9 +45,10 @@ exports.getPost = (req, res) => {
 
 //get limited infomations
 exports.getInformations = (req, res) => {
-  console.log(req.body.startAfter);
+  //console.log(req.body.startAfter);
+   
   db.collection("information")
-    .orderBy("createdAt", "desc")
+   .orderBy("createdAt", "desc")
     .get()
     .then((data) => {
       let information = [];
@@ -183,8 +189,8 @@ exports.getTags = (req, res) => {
         db.collection("tags")
           .limit(10)
           .get()
-          .then((data) => {
-            data.forEach((doc) =>
+          .then((data1) => {
+            data1.forEach((doc) =>
               tags.push({
                 tagid: doc.id,
                 tag: doc.data().tag,
@@ -300,15 +306,25 @@ exports.updateInformation = (req, res) => {
   let information = reduceInfoDetails(req.body);
 
   console.log(req.params.informationId);
-  db.doc(`/information/${req.params.informationId}`)
+
+  const document = db.doc(`/information/${req.params.informationId}`);
+
+  document
+    .get()
+    .then((doc) => {
+      console.log(doc.exists);
+    })
+
+ /*  db.doc(`/information/${req.params.informationId}`)
     .update(information)
     .then(() => {
+      //console.log(doc);
       res.json("Information update successfully");
     })
     .catch((err) => {
       console.error(err);
       res.status(500).json({ error: err });
-    });
+    }); */
 };
 //delete information
 exports.deleteInformation = (req, res) => {

@@ -62,7 +62,8 @@ app.get("/getEditorInfo", getEditoredInformations);
 app.get("/getAllInfo", getAllInformation);
 app.get("/information/:informationId",  getPost);
 app.get("/getEditoredTopics", getEditoredTopics);
-app.post("/information", FBAuth, createAInformation);
+//app.post("/information", FBAuth, createAInformation);
+app.post("/information", createAInformation);
 app.put("/information/:informationId", FBAuth, updateInformation);
 app.delete("/information/:informationId", FBAuth, deleteInformation);
 app.get("/information/:informationId/like", FBAuth, likeInformation);
@@ -293,7 +294,7 @@ exports.deleteFilesonPost = functions
           // console.log(doc.size)
           if (data.size > 0) {
             data.forEach((doc) => {
-              filename = doc.data().filename;
+              let filename = doc.data().filename;
 
               db.doc(`/fileinfo/${doc.id}`)
                 .delete()
