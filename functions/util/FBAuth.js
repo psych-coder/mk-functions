@@ -9,17 +9,19 @@ module.exports = (req,res,next) => {
         return res.status(403).json({error: 'Unauthorized'});
     }
 
-    //console.log(idToken);
+    console.log(idToken);
     admin.auth().verifyIdToken(idToken)
     .then(decodedToken =>{
         req.user = decodedToken;
-        //console.log(req.user.uid);
+        console.log(req.user.uid);
+        
         return db.collection('users')
                 .where('userId','==',req.user.uid)
                 .limit(1)
                 .get();
     }) 
     .then(data => {
+        console.log(data)
         req.user.handle = data.docs[0].data().handle;
         req.user.imageUrl = data.docs[0].data().imageUrl;
         return next();

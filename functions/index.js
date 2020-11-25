@@ -63,7 +63,7 @@ app.get("/getAllInfo", getAllInformation);
 app.get("/information/:informationId",  getPost);
 app.get("/getEditoredTopics", getEditoredTopics);
 //app.post("/information", FBAuth, createAInformation);
-app.post("/information", createAInformation);
+app.post("/information",FBAuth, createAInformation);
 app.put("/information/:informationId", FBAuth, updateInformation);
 app.delete("/information/:informationId", FBAuth, deleteInformation);
 app.get("/information/:informationId/like", FBAuth, likeInformation);
@@ -278,7 +278,7 @@ exports.updateTagsOnUpdate = functions
     }
   });
 
-exports.deleteFilesonPost = functions
+/* exports.deleteFilesonPost = functions
   .region("asia-east2")
   .firestore.document("information/{id}")
   .onCreate(async (snapshot) => {
@@ -312,3 +312,4 @@ exports.deleteFilesonPost = functions
       return;
     }
   });
+ */

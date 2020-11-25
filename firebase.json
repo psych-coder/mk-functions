@@ -8,10 +8,22 @@
       "port": 5001
     },
     "firestore": {
-      "port": 9090
+      "port": 9091
     },
     "ui": {
       "enabled": true
+    },
+    "auth": {
+      "port": 9099
+    },
+    "database": {
+      "port": 9000
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "pubsub": {
+      "port": 8085
     }
   }
 }

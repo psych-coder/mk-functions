@@ -251,7 +251,7 @@ exports.createAInformation = (req, res) => {
   const tags = getHashTags(req.body.body).toString();
   //const tags = req.body.tags;
 
-  //console.log(tags);
+  console.log( req.user);
   const newInformation = {
     title: req.body.title,
     body: req.body.body,
@@ -303,7 +303,16 @@ exports.createAInformation = (req, res) => {
 
 //update Information
 exports.updateInformation = (req, res) => {
-  let information = reduceInfoDetails(req.body);
+  
+  let information = req.body;
+
+  if (req.method !== "POST") {
+    res.status(400).json({ error: "Method not supported" });
+  }
+
+  if (req.body.body.trim() === "") {
+    return res.status(400).json({ body: "Body must not be empty" });
+  }
 
   console.log(req.params.informationId);
 
@@ -315,7 +324,7 @@ exports.updateInformation = (req, res) => {
       console.log(doc.exists);
     })
 
- /*  db.doc(`/information/${req.params.informationId}`)
+  db.doc(`/information/${req.params.informationId}`)
     .update(information)
     .then(() => {
       //console.log(doc);
@@ -324,7 +333,7 @@ exports.updateInformation = (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(500).json({ error: err });
-    }); */
+    }); 
 };
 //delete information
 exports.deleteInformation = (req, res) => {
