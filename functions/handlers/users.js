@@ -1,7 +1,11 @@
 const {admin,db } = require('../util/admin')
 const firebase = require('firebase');
 
-const config = require('../util/config')
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+
+//const config = require('../util/config')
 firebase.initializeApp(config);
 
 const {validateSignup,validateLoginData,reduceUserDetails} = require('../util/validators')
@@ -67,6 +71,7 @@ exports.login = (req,res)=>{
         password: req.body.password
     }
 
+    console.log("login")
    
     const {valid, errors } = validateLoginData(user);
     if(!valid) return res.status(400).json(errors);
@@ -81,6 +86,7 @@ exports.login = (req,res)=>{
         return res.json({token})
     })
     .catch((err) => {
+        console.log( "error")
         console.error(err)
         //if(err.code === 'auth/wrong-password' || err.code === 'auth/invalid-email' ){
         return res.status(403).json({general: 'Wrong credentials, please try again'})

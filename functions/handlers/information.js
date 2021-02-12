@@ -1,5 +1,5 @@
 const { admin, db } = require("../util/admin");
-const { reduceInfoDetails, getHashTags } = require("../util/validators");
+const { reduceInfoDetails, getHashTags,youtube_parser } = require("../util/validators");
 const config = require("../util/config");
 
 const runtimeOpts = {
@@ -34,6 +34,7 @@ exports.getPost = (req, res) => {
           topic: doc.data().topic,
           editorpick: doc.data().editorpick,
           userhandle: doc.data().userhandle,
+          youtubid: doc.data().youtubid,
         };
       }
       return res.json(information);
@@ -67,6 +68,7 @@ exports.getInformations = (req, res) => {
           topic: doc.data().topic,
           editorpick: doc.data().editorpick,
           userhandle: doc.data().userhandle,
+          youtubid: doc.data().youtubid,
         })
       );
       return res.json(information);
@@ -129,6 +131,7 @@ exports.getEditoredInformations = (req, res) => {
           topic: doc.data().topic,
           editorpick: doc.data().editorpick,
           userhandle: doc.data().userhandle,
+          youtubid: doc.data().youtubid,
         })
       );
       return res.json(information);
@@ -158,6 +161,7 @@ exports.getAllInformation = (req, res) => {
           topic: doc.data().topic,
           editorpick: doc.data().editorpick,
           userhandle: doc.data().userhandle,
+          youtubid: doc.data().youtubid,
         })
       );
       return res.json(information);
@@ -249,9 +253,10 @@ exports.createAInformation = (req, res) => {
   const imageName = req.body.imageName !== undefined ? req.body.imageName : "";
 
   const tags = getHashTags(req.body.body).toString();
+  const youtubid = youtube_parser(req.body.body);
   //const tags = req.body.tags;
 
-  console.log( req.user);
+  console.log( " youtubid = " + youtubid );
   const newInformation = {
     title: req.body.title,
     body: req.body.body,
@@ -265,6 +270,7 @@ exports.createAInformation = (req, res) => {
     likeCount: 0,
     commentCount: 0,
     imageName: imageName,
+    youtubid: youtubid,
   };
 
   //console.log(req.user.handle);

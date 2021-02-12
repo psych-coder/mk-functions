@@ -79,3 +79,42 @@ exports.getHashTags = (inputText) => {
     //console.log(matches)
     return matches;
 }
+
+exports.youtube_parser = (t) => {
+    var regex = /\bhttps?:\/\/\S+<\/p>/gi;
+  var matches = t.match(/\bhttps?:\/\/\S+<\/p>/gi);
+var youtubeid;
+  matches.forEach(youtubeid = function(entry) {
+    entry = entry.replace("</p>","");
+    //console.log(entry);
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    var m = entry.match(regExp);
+     //console.log(m);
+     if( (m&&m[7].length==11) ){
+         //console.log(m[7])
+         youtubeid= m[7];
+     }
+    //return 's';
+});
+    return youtubeid;
+}
+
+
+// function getHashTags(t) {  
+//     var regex = /\bhttps?:\/\/\S+<\/p>/gi;
+//   var matches = t.match(/\bhttps?:\/\/\S+<\/p>/gi);
+// var youtubeid;
+//   matches.forEach(youtubeid = function(entry) {
+//     entry = entry.replace("</p>","");
+//     console.log(entry);
+//     var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+//     var m = entry.match(regExp);
+//      console.log(m);
+//      if( (m&&m[7].length==11) ){
+//          //console.log(m[7])
+//          youtubeid= m[7];
+//      }
+//     //return 's';
+// });
+//     return youtubeid;
+// }
