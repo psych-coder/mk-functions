@@ -50,9 +50,23 @@ exports.getPost = (req, res) => {
 //get limited infomations
 exports.getInformations = (req, res) => {
   //console.log(req.body.startAfter);
+
+  
+  var startAfter = req.params.startAfter !== undefined ? req.params.startAfter : -1 ;
+
+  console.log(startAfter);
+
    
-  db.collection("information")
-   .orderBy("createdAt", "desc")
+  var doc;
+  if (startAfter == 1 ){
+    doc = db.collection("information")
+    .orderBy("createdAt", "desc");
+  }else{
+    doc = db.collection("information")
+    .orderBy("createdAt", "desc")
+    .startAfter(startAfter)
+    }
+    doc.limit(5)
     .get()
     .then((data) => {
       let information = [];
@@ -82,7 +96,7 @@ exports.getInformations = (req, res) => {
 };
 
 exports.getTaggedInfo = (req, res) => {
-  console.log(req.body.startAfter);
+ 
   db.collection("information")
     .where("tags", "array-contains", req.params.tagName)
     .orderBy("createdAt", "desc")
@@ -256,7 +270,7 @@ exports.createAInformation = (req, res) => {
   const imageName = req.body.imageName !== undefined ? req.body.imageName : "";
 
   const tags = getHashTags(req.body.body).toString();
-  const youtubid = youtube_parser(req.body.body);
+  const youtubid = req.body.youtubid !== undefined ? req.body.youtubid : "";
   //const tags = req.body.tags;
 
   console.log( " youtubid = " + youtubid );

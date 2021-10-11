@@ -56,7 +56,7 @@ app.get("/QA/:topic", getQA);
 app.get("/Quiz/:quizid", getQuizQA);
 
 //Information  routes
-app.get("/informations", getInformations);
+app.get("/informations/:startAfter", getInformations);
 app.get("/informations/tags/:tagName", getTaggedInfo);
 app.get("/getEditorInfo", getEditoredInformations);
 app.get("/getAllInfo", getAllInformation);

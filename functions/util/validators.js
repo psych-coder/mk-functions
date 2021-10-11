@@ -86,6 +86,7 @@ exports.youtube_parser = (t) => {
    
     if (matches) {
         matches.forEach(function (entry) {
+            console.log(entry);
             entry = entry.replaceAll("</p>", "");
             //console.log(entry);
             var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;

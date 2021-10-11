@@ -2,7 +2,6 @@ const {admin,db } = require('../util/admin')
 const firebase = require('firebase');
 
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 
 //const config = require('../util/config')
