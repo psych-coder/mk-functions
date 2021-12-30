@@ -2,7 +2,17 @@ const {admin,db } = require('../util/admin')
 const firebase = require('firebase');
 
 
-
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const config = {
+    apiKey: "AIzaSyDJ-shuAvt3Q202f8HnP2CAN80yKOpISX0",
+    authDomain: "manithakurangu-338c3.firebaseapp.com",
+    databaseURL: "https://manithakurangu-338c3.firebaseio.com",
+    projectId: "manithakurangu-338c3",
+    storageBucket: "manithakurangu-338c3.appspot.com",
+    messagingSenderId: "513036373625",
+    appId: "1:513036373625:web:689e0389769f9baf490ea8",
+    measurementId: "G-VZJZSWMJ5F"
+  };
 
 //const config = require('../util/config')
 firebase.initializeApp(config);

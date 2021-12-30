@@ -1,7 +1,16 @@
 const { admin, db } = require("../util/admin");
-const { reduceInfoDetails, getHashTags,youtube_parser } = require("../util/validators");
+const { reduceInfoDetails, getHashTags, youtube_parser } = require("../util/validators");
 
-
+const config = {
+  apiKey: "AIzaSyDJ-shuAvt3Q202f8HnP2CAN80yKOpISX0",
+  authDomain: "manithakurangu-338c3.firebaseapp.com",
+  databaseURL: "https://manithakurangu-338c3.firebaseio.com",
+  projectId: "manithakurangu-338c3",
+  storageBucket: "manithakurangu-338c3.appspot.com",
+  messagingSenderId: "513036373625",
+  appId: "1:513036373625:web:689e0389769f9baf490ea8",
+  measurementId: "G-VZJZSWMJ5F"
+};
 
 //const config = require("../util/config");
 
@@ -51,52 +60,89 @@ exports.getPost = (req, res) => {
 exports.getInformations = (req, res) => {
   //console.log(req.body.startAfter);
 
-  
-  var startAfter = req.params.startAfter !== undefined ? req.params.startAfter : -1 ;
+
+  var startAfter = req.params.startAfter !== undefined ? req.params.startAfter : -1;
 
   console.log(startAfter);
 
-   
+
   var doc;
-  if (startAfter == 1 ){
+  var doc1;
+
+  if (startAfter == 1) {
     doc = db.collection("information")
-    .orderBy("createdAt", "desc");
-  }else{
-    doc = db.collection("information")
-    .orderBy("createdAt", "desc")
-    .startAfter(startAfter)
-    }
+      .orderBy("createdAt", "desc");
+
     doc.limit(5)
-    .get()
-    .then((data) => {
-      let information = [];
-      console.log(data.size);
-      data.forEach((doc) =>
-        information.push({
-          informationId: doc.id,
-          title: doc.data().title,
-          body: doc.data().body,
-          cardImage: doc.data().cardImage,
-          commentCount: doc.data().commentCount,
-          likeCount: doc.data().likeCount,
-          createdAt: doc.data().createdAt,
-          shortDesc: doc.data().shortDesc,
-          tags: doc.data().tags,
-          topic: doc.data().topic,
-          editorpick: doc.data().editorpick,
-          userhandle: doc.data().userhandle,
-          youtubid: doc.data().youtubid,
-        })
-      );
-      return res.json(information);
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+      .get()
+      .then((data) => {
+        let information = [];
+        data.forEach((doc) =>
+          information.push({
+            informationId: doc.id,
+            title: doc.data().title,
+            body: doc.data().body,
+            cardImage: doc.data().cardImage,
+            commentCount: doc.data().commentCount,
+            likeCount: doc.data().likeCount,
+            createdAt: doc.data().createdAt,
+            shortDesc: doc.data().shortDesc,
+            tags: doc.data().tags,
+            topic: doc.data().topic,
+            editorpick: doc.data().editorpick,
+            userhandle: doc.data().userhandle,
+            youtubid: doc.data().youtubid,
+          })
+        );
+        return res.json(information);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
+
+
+  } else {
+
+    doc1 = db.doc(`/information/${startAfter}`);
+    doc1.get()
+      .then((data) => {
+        doc = db.collection("information")
+          .orderBy("createdAt", "desc")
+          .startAfter(data.data().createdAt)
+
+        doc.limit(5)
+          .get()
+          .then((data) => {
+            let information = [];
+            data.forEach((doc) =>
+              information.push({
+                informationId: doc.id,
+                title: doc.data().title,
+                body: doc.data().body,
+                cardImage: doc.data().cardImage,
+                commentCount: doc.data().commentCount,
+                likeCount: doc.data().likeCount,
+                createdAt: doc.data().createdAt,
+                shortDesc: doc.data().shortDesc,
+                tags: doc.data().tags,
+                topic: doc.data().topic,
+                editorpick: doc.data().editorpick,
+                userhandle: doc.data().userhandle,
+                youtubid: doc.data().youtubid,
+              })
+            );
+            return res.json(information);
+          })
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
 };
 
 exports.getTaggedInfo = (req, res) => {
- 
+
   db.collection("information")
     .where("tags", "array-contains", req.params.tagName)
     .orderBy("createdAt", "desc")
@@ -273,7 +319,7 @@ exports.createAInformation = (req, res) => {
   const youtubid = req.body.youtubid !== undefined ? req.body.youtubid : "";
   //const tags = req.body.tags;
 
-  console.log( " youtubid = " + youtubid );
+  console.log(" youtubid = " + youtubid);
   const newInformation = {
     title: req.body.title,
     body: req.body.body,
@@ -326,7 +372,7 @@ exports.createAInformation = (req, res) => {
 
 //update Information
 exports.updateInformation = (req, res) => {
-  
+
   let information = req.body;
 
   if (req.method !== "POST") {
@@ -356,7 +402,7 @@ exports.updateInformation = (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(500).json({ error: err });
-    }); 
+    });
 };
 //delete information
 exports.deleteInformation = (req, res) => {
